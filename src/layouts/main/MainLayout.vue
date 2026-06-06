@@ -1,16 +1,9 @@
 <template>
-  <div
-    class="layout-wrapper layout-navbar-fixed layout-wide"
-    :class="themeClass"
-    dir="ltr"
-    data-theme="theme-default"
-    data-assets-path="assets/"
-    data-template="front-pages"
-  >
+  <div class="app-shell" :class="themeClass" dir="ltr">
     <nav-bar />
-    <div class="layout-content">
+    <main class="layout-content">
       <router-view />
-    </div>
+    </main>
     <div class="layout-footer">
       <footer-bar />
     </div>
@@ -26,13 +19,13 @@ export default {
   name: 'MainLayout',
   data() {
     return {
-      themeClass: 'light-style', // Default to light
+      themeClass: 'light-style',
+      mediaQuery: null,
     };
   },
   methods: {
     setNavActive() {
       const scrollY = window.scrollY || window.pageYOffset;
-      // 设置 MAIN_LAYOUT_NAV_ACTIVE 根据滚动位置
       this.$store.commit('MAIN_LAYOUT_NAV_ACTIVE', scrollY > 0);
     },
     updateTheme(e) {
@@ -47,68 +40,44 @@ export default {
     },
   },
   mounted() {
-    // 在组件挂载后，添加滚动事件监听器
     window.addEventListener('scroll', this.setNavActive);
+    this.mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    this.updateTheme(this.mediaQuery);
 
-    // Initialize theme based on system preference
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    this.updateTheme(mediaQuery);
-    
-    // Listen for theme changes
-    // Use addEventListener if supported (modern browsers), else addListener (older Safari)
-    if (mediaQuery.addEventListener) {
-      mediaQuery.addEventListener('change', this.updateTheme);
+    if (this.mediaQuery.addEventListener) {
+      this.mediaQuery.addEventListener('change', this.updateTheme);
     } else {
-      mediaQuery.addListener(this.updateTheme);
+      this.mediaQuery.addListener(this.updateTheme);
     }
   },
   beforeUnmount() {
-    // 在组件销毁前，移除滚动事件监听器，以防止内存泄漏
     window.removeEventListener('scroll', this.setNavActive);
-    
-    // Remove theme listener
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    if (mediaQuery.removeEventListener) {
-      mediaQuery.removeEventListener('change', this.updateTheme);
+
+    if (this.mediaQuery?.removeEventListener) {
+      this.mediaQuery.removeEventListener('change', this.updateTheme);
     } else {
-      mediaQuery.removeListener(this.updateTheme);
+      this.mediaQuery?.removeListener(this.updateTheme);
     }
   },
 };
 </script>
 
 <style>
-:root {
-  color-scheme: light dark;
-}
-/* Global Dark Mode Overrides for Element Plus */
 body.dark-style .el-loading-mask {
   background-color: rgba(0, 0, 0, 0.7) !important;
 }
 </style>
 
 <style scoped>
-@import '@/assets/vendor/css/pages/front-page.css';
-@import '@/assets/vendor/css/pages/front-page-landing.css';
-
-.layout-wrapper {
+.app-shell {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-}
-
-.layout-wrapper.light-style {
-  background: linear-gradient(338.18deg, #fafaff 0%, #ececec 94.44%);
-}
-
-.layout-wrapper.dark-style {
-  background-color: #25293c;
+  color: var(--text-primary);
 }
 
 .layout-content {
   flex: 1;
-  display: flex;
-  flex-direction: column;
 }
 
 .layout-footer {

@@ -12,7 +12,6 @@ export default {
 </script>
 
 <style>
-@import '@/assets/vendor/css/rtl/core.css';
-@import '@/assets/vendor/css/rtl/theme-default.css';
+@import '@/assets/theme.css';
 @import 'element-plus/theme-chalk/index.css';
 </style>

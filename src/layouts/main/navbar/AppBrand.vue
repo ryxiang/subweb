@@ -1,52 +1,29 @@
 <template>
-  <div class="navbar-brand app-brand demo d-flex py-0 py-lg-2 me-4">
-    <!-- Mobile menu toggle: Start-->
-    <button
-      class="navbar-toggler border-0 px-0 me-2"
-      type="button"
-      data-bs-toggle="collapse"
-      data-bs-target="#navbarSupportedContent"
-      aria-controls="navbarSupportedContent"
-      aria-expanded="false"
-      aria-label="Toggle navigation"
-      @click="$store.commit('MAIN_LAYOUT_MENU_EXPAND')"
-    >
-      <i class="ti ti-menu-2 ti-sm align-middle"></i>
-    </button>
-    <!-- Mobile menu toggle: End-->
-    <router-link to="/" class="app-brand-link">
-      <span class="app-brand-logo demo">
-        <svg width="32" height="22" viewBox="0 0 32 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path
-            fill-rule="evenodd"
-            clip-rule="evenodd"
-            d="M0.00172773 0V6.85398C0.00172773 6.85398 -0.133178 9.01207 1.98092 10.8388L13.6912 21.9964L19.7809 21.9181L18.8042 9.88248L16.4951 7.17289L9.23799 0H0.00172773Z"
-            fill="#7367F0"
-          />
-          <path
-            opacity="0.06"
-            fill-rule="evenodd"
-            clip-rule="evenodd"
-            d="M7.69824 16.4364L12.5199 3.23696L16.5541 7.25596L7.69824 16.4364Z"
-            fill="#161616"
-          />
-          <path
-            opacity="0.06"
-            fill-rule="evenodd"
-            clip-rule="evenodd"
-            d="M8.07751 15.9175L13.9419 4.63989L16.5849 7.28475L8.07751 15.9175Z"
-            fill="#161616"
-          />
-          <path
-            fill-rule="evenodd"
-            clip-rule="evenodd"
-            d="M7.77295 16.3566L23.6563 0H32V6.88383C32 6.88383 31.8262 9.17836 30.6591 10.4057L19.7824 22H13.6938L7.77295 16.3566Z"
-            fill="#7367F0"
-          />
+  <div class="brand-wrap">
+    <router-link to="/" class="brand-link" aria-label="返回首页">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 64 64">
+          <path d="M17 20h27" class="line line-cyan" />
+          <path d="m40 11 10 9-10 9" class="line arrow-cyan" />
+          <path d="M47 44H20" class="line line-green" />
+          <path d="m24 35-10 9 10 9" class="line arrow-green" />
+          <path d="M24 31c0-6 4-10 9-10 3 0 6 1 8 3" class="line line-core" />
+          <path d="M40 33c0 6-4 10-9 10-3 0-6-1-8-3" class="line line-core" />
         </svg>
       </span>
-      <span class="app-brand-text demo menu-text fw-bold ms-2 ps-1">{{ siteName }}</span>
+      <span class="brand-text">{{ siteName }}</span>
     </router-link>
+    <button
+      class="menu-toggle"
+      type="button"
+      :aria-expanded="$store.state.style.main.isCollapsed"
+      aria-label="打开导航菜单"
+      @click="$store.commit('MAIN_LAYOUT_MENU_EXPAND')"
+    >
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 7h16M4 12h16M4 17h16" />
+      </svg>
+    </button>
   </div>
 </template>
 
@@ -63,3 +40,126 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.brand-wrap,
+.brand-link {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+}
+
+.brand-wrap {
+  gap: 10px;
+}
+
+.brand-link {
+  gap: 11px;
+  color: var(--text-primary);
+  text-decoration: none;
+}
+
+.brand-mark {
+  display: grid;
+  width: 43px;
+  height: 43px;
+  flex: 0 0 auto;
+  place-items: center;
+  overflow: hidden;
+  background: linear-gradient(145deg, rgba(15, 23, 42, 0.96), rgba(30, 41, 59, 0.94));
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: 13px;
+  box-shadow:
+    0 10px 22px rgba(2, 132, 199, 0.16),
+    0 5px 12px rgba(101, 163, 13, 0.12);
+}
+
+.brand-mark svg {
+  width: 34px;
+  height: 34px;
+  fill: none;
+}
+
+.line {
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.line-cyan {
+  stroke: #38bdf8;
+}
+
+.arrow-cyan {
+  stroke: #67e8f9;
+}
+
+.line-green {
+  stroke: #34d399;
+}
+
+.arrow-green {
+  stroke: #bef264;
+}
+
+.line-core {
+  stroke: #f8fafc;
+  stroke-width: 4;
+}
+
+.brand-text {
+  overflow: hidden;
+  font-size: 1rem;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.menu-toggle {
+  display: none;
+  width: 42px;
+  height: 42px;
+  padding: 10px;
+  color: var(--text-primary);
+  cursor: pointer;
+  background: var(--control-bg);
+  border: 1px solid var(--control-border);
+  border-radius: 999px;
+}
+
+.menu-toggle svg {
+  width: 100%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+}
+
+@media (max-width: 720px) {
+  .brand-wrap {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .brand-mark {
+    width: 39px;
+    height: 39px;
+    border-radius: 12px;
+  }
+
+  .brand-mark svg {
+    width: 31px;
+    height: 31px;
+  }
+
+  .brand-text {
+    max-width: 210px;
+  }
+
+  .menu-toggle {
+    display: inline-grid;
+    flex: 0 0 auto;
+    place-items: center;
+  }
+}
+</style>

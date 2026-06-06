@@ -1,117 +1,167 @@
 <template>
-  <div class="row g-4 custom-div">
-    <div class="col-12 col-lg-12 pt-4 pt-lg-0">
-      <div class="tab-content p-0">
-        <div class="tab-pane fade show active">
-          <div class="card mb-4">
-            <div class="card-body">
-              <div class="row mb-3 g-3">
-                <div class="col-12 col-md-12">
-                  <label class="form-label" for="add-user-email">订阅链接</label>
-                  <textarea class="form-control" v-model.trim="urls" :placeholder="placeholder" rows="3"></textarea>
-                </div>
-                <div class="col-5 col-md-6">
-                  <label class="form-label" for="client">客户端</label>
-                  <select class="form-select" id="client" v-model="target" @change="selectTarget">
-                    <option v-for="option in targetOptions" :key="option" :value="option.value">
-                      {{ option.text }}
-                    </option>
-                  </select>
-                </div>
-                <div class="col-7 col-md-6">
-                  <label class="form-label" for="api">后端服务</label>
-                  <select class="form-select" id="api" @change="selectApi">
-                    <option v-for="option in backendOptions" :key="option.name" :value="option.url">
-                      {{ option.name }}
-                    </option>
-                    <option value="manual">自定义后端 API 地址</option>
-                  </select>
-                </div>
-                <div class="col-12 col-md-12" v-if="isShowManualApiUrl">
-                  <input class="form-control" placeholder="自定义后端 API 地址示例：https://sub.ops.ci" v-model="api" />
-                </div>
-                <div class="col-8 col-md-10">
-                  <label class="form-label" for="remote">远程配置</label>
-                  <select class="form-select" id="remote" @change="selectRemoteConfig">
-                    <option v-for="option in remoteConfigOptions" :key="option" :value="option.value">
-                      {{ option.text }}
-                    </option>
-                    <option value="manual">自定义远程配置地址</option>
-                  </select>
-                </div>
-                <div class="col-4 col-md-2">
-                  <label class="form-label">&nbsp;</label>
-                  <el-button type="warning" @click="showMoreConfig" style="width: 100%">参数</el-button>
-                </div>
-                <div class="col-12 col-md-12" v-if="isShowRemoteConfig">
-                  <input class="form-control" placeholder="自定义远程配置地址：" v-model="remoteConfig" />
-                </div>
-                <div class="col-12 col-md-12" v-if="isShowMoreConfig">
-                  <label class="form-label" for="add-user-email">可选参数</label>
-                  <div class="row g-3">
-                    <div class="col-12 col-md-12">
-                      <input class="form-control" placeholder="Include: 可选" v-model="moreConfig.include" />
-                    </div>
-                    <div class="col-12 col-md-12">
-                      <input class="form-control" placeholder="Exclude: 可选" v-model="moreConfig.exclude" />
-                    </div>
-                    <div class="col-md check-div" :style="{ display: 'flex', flexWrap: 'wrap' }">
-                      <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="checkbox" id="emoji" v-model="moreConfig.emoji" />
-                        <label class="form-check-label" for="emoji">Emoji</label>
-                      </div>
-                      <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="checkbox" id="udp" v-model="moreConfig.udp" />
-                        <label class="form-check-label" for="udp">开启UDP</label>
-                      </div>
-                      <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="checkbox" id="sort" v-model="moreConfig.sort" />
-                        <label class="form-check-label" for="sort">排序节点</label>
-                      </div>
-                      <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="checkbox" id="scv" v-model="moreConfig.scv" />
-                        <label class="form-check-label" for="scv">关闭证书检查</label>
-                      </div>
-                      <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="checkbox" id="nodelist" v-model="moreConfig.list" />
-                        <label class="form-check-label" for="nodelist">Node List</label>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-12 col-md-12">
-                  <div class="divider divider-dashed">
-                    <div class="divider-text"><i class="ti ti-refresh" style="color: gray"></i></div>
-                  </div>
-                </div>
-                <div class="col-12 col-md-10">
-                  <input class="form-control" placeholder="点击转换链接" v-model.trim="result.subUrl" />
-                </div>
-                <div class="col-12 col-md-2">
-                  <el-button type="success" @click="getSubUrl()" style="width: 100%">转换</el-button>
-                </div>
-                <template v-if="isShortUrlEnabled">
-                  <div class="col-12 col-md-10">
-                    <input class="form-control" placeholder="点击获取短链" v-model.trim="result.shortUrl" />
-                  </div>
-                  <div class="col-12 col-md-2">
-                    <el-button type="primary" :loading="isShortUrlLoading" @click="getShortUrl()" style="width: 100%" class="short-url-btn">短链</el-button>
-                  </div>
-                </template>
-              </div>
-            </div>
-          </div>
+  <form class="converter-form" @submit.prevent="getSubUrl">
+    <div class="section-heading">
+      <div>
+        <span class="section-kicker">Subscription converter</span>
+        <h2>生成订阅链接</h2>
+      </div>
+      <span class="section-badge">{{ targetLabel }}</span>
+    </div>
+
+    <div class="field field-wide">
+      <label for="subscription-urls">订阅链接或节点</label>
+      <textarea
+        id="subscription-urls"
+        v-model.trim="urls"
+        :placeholder="placeholder"
+        rows="4"
+        spellcheck="false"
+      ></textarea>
+      <span class="field-hint">每行一条，也支持使用 | 分隔多个链接或节点。</span>
+    </div>
+
+    <div class="field-grid">
+      <div class="field">
+        <label for="client">目标客户端</label>
+        <div class="select-wrap">
+          <select id="client" v-model="target">
+            <option v-for="option in targetOptions" :key="option.value" :value="option.value">
+              {{ option.text }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="api">后端服务</label>
+        <div class="select-wrap">
+          <select id="api" @change="selectApi">
+            <option v-for="option in backendOptions" :key="`${option.name}-${option.url}`" :value="option.url">
+              {{ option.name }}
+            </option>
+            <option value="manual">自定义后端 API 地址</option>
+          </select>
         </div>
       </div>
     </div>
-  </div>
+
+    <div v-if="isShowManualApiUrl" class="field field-wide reveal-block">
+      <label for="manual-api">自定义后端 API</label>
+      <input id="manual-api" v-model.trim="api" type="url" placeholder="https://sub.example.com" />
+    </div>
+
+    <div class="remote-row">
+      <div class="field">
+        <label for="remote">远程配置</label>
+        <div class="select-wrap">
+          <select id="remote" @change="selectRemoteConfig">
+            <option v-for="option in remoteConfigOptions" :key="`${option.text}-${option.value}`" :value="option.value">
+              {{ option.text }}
+            </option>
+            <option value="manual">自定义远程配置地址</option>
+          </select>
+        </div>
+      </div>
+      <button
+        class="secondary-button parameter-button"
+        type="button"
+        :aria-expanded="isShowMoreConfig"
+        @click="showMoreConfig"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4 7h10M18 7h2M4 17h2M10 17h10M14 5v4M6 15v4" />
+        </svg>
+        {{ isShowMoreConfig ? '收起参数' : '可选参数' }}
+      </button>
+    </div>
+
+    <div v-if="isShowRemoteConfig" class="field field-wide reveal-block">
+      <label for="manual-remote">自定义远程配置</label>
+      <input id="manual-remote" v-model.trim="remoteConfig" type="url" placeholder="https://example.com/config.ini" />
+    </div>
+
+    <section v-if="isShowMoreConfig" class="options-panel reveal-block" aria-label="可选参数">
+      <div class="options-inputs">
+        <div class="field">
+          <label for="include">Include</label>
+          <input id="include" v-model="moreConfig.include" placeholder="仅保留匹配节点，可选" />
+        </div>
+        <div class="field">
+          <label for="exclude">Exclude</label>
+          <input id="exclude" v-model="moreConfig.exclude" placeholder="排除匹配节点，可选" />
+        </div>
+      </div>
+      <div class="check-grid">
+        <label class="check-chip" for="emoji">
+          <input id="emoji" v-model="moreConfig.emoji" type="checkbox" />
+          <span class="check-mark"></span>
+          Emoji
+        </label>
+        <label class="check-chip" for="udp">
+          <input id="udp" v-model="moreConfig.udp" type="checkbox" />
+          <span class="check-mark"></span>
+          开启 UDP
+        </label>
+        <label class="check-chip" for="sort">
+          <input id="sort" v-model="moreConfig.sort" type="checkbox" />
+          <span class="check-mark"></span>
+          排序节点
+        </label>
+        <label class="check-chip" for="scv">
+          <input id="scv" v-model="moreConfig.scv" type="checkbox" />
+          <span class="check-mark"></span>
+          关闭证书检查
+        </label>
+        <label class="check-chip" for="nodelist">
+          <input id="nodelist" v-model="moreConfig.list" type="checkbox" />
+          <span class="check-mark"></span>
+          Node List
+        </label>
+      </div>
+    </section>
+
+    <div class="section-divider">
+      <span></span>
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M20 11a8.1 8.1 0 0 0-15.5-2M4 5v4h4M4 13a8.1 8.1 0 0 0 15.5 2M20 19v-4h-4" />
+      </svg>
+      <span></span>
+    </div>
+
+    <div class="result-group">
+      <div class="result-copy">
+        <label for="result-url">转换结果</label>
+        <input id="result-url" v-model.trim="result.subUrl" placeholder="点击转换后自动生成并复制" />
+      </div>
+      <button class="primary-button" type="submit">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M5 12h14M13 6l6 6-6 6" />
+        </svg>
+        转换并复制
+      </button>
+    </div>
+
+    <div v-if="isShortUrlEnabled" class="result-group short-result">
+      <div class="result-copy">
+        <label for="short-url">短链接</label>
+        <input id="short-url" v-model.trim="result.shortUrl" placeholder="生成便于分享的短链接" />
+      </div>
+      <button class="secondary-button short-url-btn" type="button" :disabled="isShortUrlLoading" @click="getShortUrl">
+        <span v-if="isShortUrlLoading" class="spinner" aria-hidden="true"></span>
+        <svg v-else viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M10 13a5 5 0 0 0 7.1.1l2-2a5 5 0 0 0-7.1-7.1l-1.1 1.1M14 11a5 5 0 0 0-7.1-.1l-2 2A5 5 0 0 0 12 20l1.1-1.1" />
+        </svg>
+        {{ isShortUrlLoading ? '生成中' : '生成短链' }}
+      </button>
+    </div>
+  </form>
 </template>
 
 <script>
-// import { showLoading, hideLoading } from '@/components/loading';
 import { getSubLink, regexCheck } from './index.js';
 import { request } from '@/network';
 import showNotification from '@/components/notification';
+
 export default {
   name: 'SubTable',
   setup() {
@@ -130,16 +180,16 @@ export default {
   },
   data() {
     return {
-      placeholder: '多订阅链接或节点请确保每行一条\n支持手动使用"|"分割多链接或节点',
+      placeholder: 'https://example.com/subscription\nvmess://...\nss://...',
       targetOptions: [
         { value: 'clash', text: 'Clash' },
         { value: 'clashr', text: 'ClashR' },
         { value: 'v2ray', text: 'V2Ray' },
         { value: 'quan', text: 'Quantumult' },
         { value: 'quanx', text: 'Quantumult X' },
-        { value: 'surge&ver=2', text: 'SurgeV2' },
-        { value: 'surge&ver=3', text: 'SurgeV3' },
-        { value: 'surge&ver=4', text: 'SurgeV4' },
+        { value: 'surge&ver=2', text: 'Surge V2' },
+        { value: 'surge&ver=3', text: 'Surge V3' },
+        { value: 'surge&ver=4', text: 'Surge V4' },
         { value: 'surfboard', text: 'Surfboard' },
         { value: 'ss', text: 'SS (SIP002)' },
         { value: 'sssub', text: 'SS Android' },
@@ -151,8 +201,8 @@ export default {
       backendOptions: [],
       api: '',
       shortUrl: window.config.shortUrl,
-      remoteConfigOptions: window.config.remoteConfigOptions,
-      moreConfig: this.DEFAULT_MORECONFIG,
+      remoteConfigOptions: window.config.remoteConfigOptions || [],
+      moreConfig: { ...this.DEFAULT_MORECONFIG },
       isShowMoreConfig: false,
       isShowManualApiUrl: false,
       isShowRemoteConfig: false,
@@ -160,16 +210,18 @@ export default {
         subUrl: '',
         shortUrl: '',
       },
-      urls: [],
+      urls: '',
       target: 'clash',
       remoteConfig: window.config.remoteConfigOptions?.[0]?.value || '',
       isShortUrlLoading: false,
     };
   },
   computed: {
-    // 判断短链接功能是否启用
     isShortUrlEnabled() {
       return window.config.enableShortUrl !== false;
+    },
+    targetLabel() {
+      return this.targetOptions.find((option) => option.value === this.target)?.text || this.target;
     },
   },
   created() {
@@ -187,7 +239,7 @@ export default {
       this.isShowMoreConfig = !this.isShowMoreConfig;
     },
     selectApi(event) {
-      if (event.target.value == 'manual') {
+      if (event.target.value === 'manual') {
         this.api = '';
         this.isShowManualApiUrl = true;
       } else {
@@ -196,7 +248,7 @@ export default {
       }
     },
     selectRemoteConfig(event) {
-      if (event.target.value == 'manual') {
+      if (event.target.value === 'manual') {
         this.remoteConfig = '';
         this.isShowRemoteConfig = true;
       } else {
@@ -204,27 +256,36 @@ export default {
         this.remoteConfig = event.target.value;
       }
     },
-    toCopy(url, title) {
+    async toCopy(url, title) {
       if (!url) {
-        this.$showDialog('warning', '注意', '复制失败 内容为空');
+        this.$showDialog('warning', '注意', '复制失败，内容为空');
         return;
       }
-      var copyInput = document.createElement('input');
-      copyInput.setAttribute('value', url);
-      document.body.appendChild(copyInput);
-      copyInput.select();
+
       try {
-        var copyed = document.execCommand('copy');
-        if (copyed) {
-          document.body.removeChild(copyInput);
-          showNotification(title + ' 复制成功', '成功');
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(url);
+        } else {
+          const copyInput = document.createElement('textarea');
+          copyInput.value = url;
+          copyInput.setAttribute('readonly', '');
+          copyInput.style.position = 'fixed';
+          copyInput.style.opacity = '0';
+          document.body.appendChild(copyInput);
+          copyInput.select();
+          const copied = document.execCommand('copy');
+          copyInput.remove();
+          if (!copied) {
+            throw new Error('Copy command was rejected');
+          }
         }
+        showNotification(`${title}复制成功`, '成功');
       } catch {
-        this.$showDialog('warning', '注意', '复制失败，请检查浏览器兼容性');
+        this.$showDialog('warning', '注意', '复制失败，请手动复制生成的链接');
       }
     },
     getConverter() {
-      if (this.urls == '') {
+      if (this.urls === '') {
         this.$showDialog('warning', '注意', '请输入订阅链接或节点');
         return false;
       }
@@ -232,12 +293,11 @@ export default {
         this.$showDialog('warning', '注意', '请输入自定义后端 API 地址，或选择默认后端服务。');
         return false;
       }
-      if (this.remoteConfig == '' && this.isShowRemoteConfig) {
+      if (this.remoteConfig === '' && this.isShowRemoteConfig) {
         this.$showDialog('warning', '注意', '请输入远程配置地址，或选择默认配置。');
         return false;
       }
       if (this.api.endsWith('/')) {
-        // 自动删除末尾的斜杠
         this.api = this.api.slice(0, -1);
       }
       this.result.subUrl = getSubLink(
@@ -251,35 +311,34 @@ export default {
       return true;
     },
     getSubUrl() {
-      if (!this.getConverter()) {
-        return;
+      if (this.getConverter()) {
+        this.toCopy(this.result.subUrl, '订阅链接');
       }
-      this.toCopy(this.result.subUrl, '订阅链接');
     },
     getShortUrl() {
       if (!this.getConverter()) {
         return;
       }
       this.isShortUrlLoading = true;
-      let data = new FormData();
+      const data = new FormData();
       data.append('longUrl', btoa(this.result.subUrl));
       request({
         method: 'post',
-        url: this.shortUrl + '/short',
-        header: {
-          'Content-Type': 'application/form-data; charset=utf-8',
-        },
-        data: data,
+        url: `${this.shortUrl}/short`,
+        data,
       })
         .then((res) => {
           if (res.data.Code === 1 && res.data.ShortUrl !== '') {
             this.result.shortUrl = res.data.ShortUrl;
             this.toCopy(this.result.shortUrl, '短链接');
+          } else {
+            this.$showDialog('error', '失败', '短链接服务未返回有效链接');
           }
-          this.isShortUrlLoading = false;
         })
         .catch(() => {
-          this.$showDialog('error', '失败', '短链接生成失败 请检查短链接服务是否可用');
+          this.$showDialog('error', '失败', '短链接生成失败，请检查短链接服务是否可用');
+        })
+        .finally(() => {
           this.isShortUrlLoading = false;
         });
     },
@@ -288,85 +347,407 @@ export default {
 </script>
 
 <style scoped>
-.custom-div {
-  width: 100%;
-  margin: 0 auto;
-}
-@media (min-width: 767.98px) {
-  .custom-div {
-    width: 90%;
-    margin: 0 auto;
-  }
-}
-@media (min-width: 991.98px) {
-  .custom-div {
-    width: 80%;
-    margin: 0 auto;
-  }
-}
-@media (min-width: 1199.98px) {
-  .custom-div {
-    width: 70%;
-    margin: 0 auto;
-  }
+.converter-form {
+  display: grid;
+  gap: 20px;
 }
 
-.btn {
-  width: 100%;
-}
-
-.check-div {
+.section-heading {
   display: flex;
-  justify-content: center; /* 水平居中 */
-  align-items: center; /* 垂直居中 */
-  height: 100%; /* 可以设置固定高度或者根据需求调整 */
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  padding-bottom: 4px;
 }
 
-.divider {
-  margin: 1%;
-}
-</style>
-
-<style>
-/* Dark Mode Component Overrides */
-.dark-style .card {
-  background-color: #2f3349;
-  color: #cfd3ec;
-  border: none;
+.section-kicker {
+  display: block;
+  margin-bottom: 7px;
+  color: var(--accent-blue);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
 }
 
-.dark-style .form-label,
-.dark-style .form-check-label {
-  color: #cfd3ec;
+.section-heading h2 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: clamp(1.45rem, 3vw, 1.85rem);
+  line-height: 1.15;
+  letter-spacing: -0.025em;
 }
 
-.dark-style .form-control,
-.dark-style .form-select {
-  background-color: #25293c;
-  border-color: #434968;
-  color: #cfd3ec;
+.section-badge {
+  display: inline-flex;
+  min-height: 34px;
+  align-items: center;
+  padding: 7px 12px;
+  color: var(--text-primary);
+  font-size: 0.78rem;
+  font-weight: 700;
+  background: var(--accent-soft);
+  border: 1px solid color-mix(in srgb, var(--accent-blue) 22%, transparent);
+  border-radius: 999px;
 }
 
-.dark-style .form-control:focus,
-.dark-style .form-select:focus {
-  background-color: #25293c;
-  border-color: #7367f0;
-  color: #cfd3ec;
+.field-grid,
+.options-inputs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
 }
 
-.dark-style .form-control::placeholder {
-  color: #5c617a;
+.field {
+  display: grid;
+  min-width: 0;
+  gap: 8px;
 }
 
-/* Fix button text shifting on loading */
-.short-url-btn {
+.field label,
+.result-copy label {
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.field-hint {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+input,
+select,
+textarea {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  color: var(--text-primary);
+  background: var(--control-bg);
+  border: 1px solid var(--control-border);
+  border-radius: 16px;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+input,
+select {
+  min-height: 50px;
+  padding: 0 15px;
+}
+
+textarea {
+  min-height: 126px;
+  padding: 14px 15px;
+  line-height: 1.55;
+  resize: vertical;
+}
+
+input:hover,
+select:hover,
+textarea:hover {
+  background: var(--control-hover);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  background: var(--control-hover);
+  border-color: color-mix(in srgb, var(--accent-blue) 58%, transparent);
+  box-shadow: 0 0 0 4px var(--accent-soft);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-muted);
+  opacity: 0.72;
+}
+
+.select-wrap {
   position: relative;
 }
-.short-url-btn .el-icon.is-loading {
+
+.select-wrap::after {
   position: absolute;
-  left: 15px;
   top: 50%;
-  transform: translateY(-50%);
-  margin-right: 0 !important;
+  right: 16px;
+  width: 8px;
+  height: 8px;
+  pointer-events: none;
+  border-right: 2px solid var(--text-muted);
+  border-bottom: 2px solid var(--text-muted);
+  content: '';
+  transform: translateY(-70%) rotate(45deg);
+}
+
+select {
+  padding-right: 42px;
+  cursor: pointer;
+  appearance: none;
+}
+
+.remote-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 12px;
+}
+
+.primary-button,
+.secondary-button {
+  display: inline-flex;
+  min-height: 50px;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 12px 18px;
+  color: var(--text-primary);
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  background: var(--control-bg);
+  border: 1px solid var(--control-border);
+  border-radius: 999px;
+  box-shadow: var(--control-shadow);
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.primary-button {
+  color: #f8fafc;
+  background: var(--accent-gradient);
+  border-color: transparent;
+}
+
+.primary-button:hover,
+.secondary-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.secondary-button:hover:not(:disabled) {
+  background: var(--control-hover);
+}
+
+.primary-button svg,
+.secondary-button svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.parameter-button {
+  min-width: 132px;
+}
+
+.options-panel {
+  display: grid;
+  gap: 17px;
+  padding: 18px;
+  background: var(--surface-soft);
+  border: 1px solid var(--inner-border);
+  border-radius: 22px;
+}
+
+.check-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+.check-chip {
+  display: inline-flex;
+  min-height: 39px;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  background: var(--control-bg);
+  border: 1px solid var(--control-border);
+  border-radius: 999px;
+  transition:
+    color 0.2s ease,
+    background 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.check-chip:has(input:checked) {
+  color: var(--text-primary);
+  background: var(--accent-soft);
+  border-color: color-mix(in srgb, var(--accent-blue) 34%, transparent);
+}
+
+.check-chip input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  min-height: 0;
+  opacity: 0;
+}
+
+.check-mark {
+  display: grid;
+  width: 17px;
+  height: 17px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1.5px solid var(--control-border);
+  border-radius: 5px;
+}
+
+.check-chip input:checked + .check-mark {
+  background: var(--accent-gradient);
+  border-color: transparent;
+}
+
+.check-chip input:checked + .check-mark::after {
+  width: 7px;
+  height: 4px;
+  border-bottom: 2px solid #fff;
+  border-left: 2px solid #fff;
+  content: '';
+  transform: translateY(-1px) rotate(-45deg);
+}
+
+.check-chip:has(input:focus-visible) {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.section-divider {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 13px;
+  color: var(--text-muted);
+}
+
+.section-divider span {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--inner-border));
+}
+
+.section-divider span:last-child {
+  background: linear-gradient(90deg, var(--inner-border), transparent);
+}
+
+.section-divider svg {
+  width: 19px;
+  height: 19px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.result-group {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 12px;
+}
+
+.result-copy {
+  display: grid;
+  min-width: 0;
+  gap: 8px;
+}
+
+.result-group button {
+  min-width: 164px;
+}
+
+.short-result {
+  padding-top: 17px;
+  border-top: 1px solid var(--inner-border);
+}
+
+.short-url-btn:disabled {
+  cursor: progress;
+  opacity: 0.72;
+}
+
+.spinner {
+  width: 17px;
+  height: 17px;
+  border: 2px solid color-mix(in srgb, var(--text-primary) 25%, transparent);
+  border-top-color: var(--accent-blue);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+.reveal-block {
+  animation: reveal 0.24s ease-out;
+}
+
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 680px) {
+  .converter-form {
+    gap: 17px;
+  }
+
+  .section-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 11px;
+  }
+
+  .field-grid,
+  .options-inputs,
+  .remote-row,
+  .result-group {
+    grid-template-columns: 1fr;
+  }
+
+  .parameter-button,
+  .result-group button {
+    width: 100%;
+  }
+
+  .options-panel {
+    padding: 15px;
+    border-radius: 18px;
+  }
+}
+
+@media (max-width: 420px) {
+  .check-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .check-chip {
+    justify-content: flex-start;
+    padding-inline: 10px;
+  }
 }
 </style>

@@ -71,7 +71,9 @@ export default {
   justify-content: center;
   padding: 1rem;
   overflow-y: auto;
-  background-color: rgba(15, 23, 42, 0.45);
+  background-color: rgba(2, 6, 23, 0.58);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   z-index: 3000;
 }
 
@@ -80,15 +82,19 @@ export default {
   display: grid;
   justify-items: center;
   row-gap: 0.75rem;
-  background: #fff;
-  border-radius: 0.75rem;
-  padding: 1.5rem;
-  box-shadow: 0 20px 45px rgba(15, 23, 42, 0.25);
+  color: var(--text-primary);
+  background: var(--surface-strong);
+  border: 1px solid var(--surface-border);
+  border-radius: 1.5rem;
+  padding: 1.75rem;
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
 }
 
 .swal2-title {
   margin: 0;
-  color: #3a3754;
+  color: var(--text-primary);
   font-size: 1.5rem;
   font-weight: 600;
   text-align: center;
@@ -96,7 +102,8 @@ export default {
 
 .swal2-html-container {
   margin: 0;
-  color: #6f6b7d;
+  color: var(--text-secondary);
+  line-height: 1.6;
   text-align: center;
   word-break: break-word;
 }
@@ -199,17 +206,32 @@ export default {
 
 :deep(.btn) {
   min-width: 96px;
+  min-height: 42px;
+  padding: 10px 17px;
+  color: #f8fafc;
+  font-weight: 700;
+  cursor: pointer;
+  background: var(--accent-gradient);
+  border: 1px solid transparent;
+  border-radius: 999px;
+  box-shadow: var(--control-shadow);
 }
 
-:global(.dark-style) .swal2-popup {
-  background: #2f3349;
+:deep(.btn-label-secondary) {
+  color: var(--text-primary);
+  background: var(--control-bg);
+  border-color: var(--control-border);
 }
 
-:global(.dark-style) .swal2-title {
-  color: #cfd3ec;
+:deep(.btn-success) {
+  background: var(--success);
 }
 
-:global(.dark-style) .swal2-html-container {
-  color: #b9bed8;
+:deep(.btn-warning) {
+  background: var(--warning);
+}
+
+:deep(.btn-danger) {
+  background: var(--danger);
 }
 </style>

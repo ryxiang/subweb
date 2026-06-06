@@ -6,6 +6,9 @@ import DialogView from '@/components/dialog/DialogView.vue';
 import { showDialog, closeDialog } from 'components/dialog';
 import * as ElementPlusIconsVue from '@element-plus/icons-vue';
 
+const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)').matches;
+document.body.classList.add(prefersDarkScheme ? 'dark-style' : 'light-style');
+
 function runtimeConfigUrl(path) {
     return `${import.meta.env.BASE_URL}${path}`;
 }
@@ -48,6 +51,7 @@ async function loadRuntimeConfig() {
 }
 
 await loadRuntimeConfig();
+document.title = `${window.config.siteName || 'Subconverter Web'} - 在线订阅转换`;
 
 const app = createApp(App);
 
