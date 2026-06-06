@@ -1,11 +1,12 @@
 FROM node:26-alpine AS build
 LABEL maintainer="Stille <stille@ioiox.com>"
 
-ENV VERSION 2.0
+ENV VERSION=2.0
 
 WORKDIR /app
-COPY . /app
-RUN npm install
+COPY package.json package-lock.json ./
+RUN npm ci
+COPY . .
 RUN npm run build
 
 FROM nginx:1.31.1-alpine
